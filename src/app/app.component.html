@@ -1,1 +1,22 @@
-<router-outlet></router-outlet>
+<mat-drawer-container autosize>
+  <mat-drawer #sidenav mode="over" role="navigation">
+    <mat-nav-list class="el-menu">
+      <a mat-list-item [routerLinkActive]="'active'" href="/taller/texturas">
+        <mat-icon>extension</mat-icon>
+        <span>Texturas</span>
+      </a>
+      <a mat-list-item [routerLinkActive]="'active'" href="/taller/complementos">
+        <mat-icon>extension</mat-icon>
+        <span>Complementos</span>
+      </a>
+    </mat-nav-list>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div class="mi-menu">
+      <button mat-fab color="warn" (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
+</mat-drawer-container>
