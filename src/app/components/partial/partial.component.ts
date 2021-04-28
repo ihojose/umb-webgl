@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import * as THREE from 'three';
 import { BoxGeometry } from 'three-full/sources/geometries/BoxGeometry';
@@ -18,12 +18,19 @@ import { UtilService } from '../../includes/util.service';
 @Component( {
   selector: 'app-partial',
   templateUrl: './partial.component.html',
-  styleUrls: [ './partial.component.scss' ]
+  styleUrls: [ './partial.component.scss' ],
 } )
 export class PartialComponent implements OnInit, AfterViewInit {
 
   @ViewChild( 'container' )
   public container: ElementRef;
+
+  @ViewChild( 'scoreOne' )
+  public scoreOne: ElementRef;
+
+  @ViewChild( 'scoreTwo' )
+  public scoreTow: ElementRef;
+
   public stats: Stats;
   public scene: Scene;
   public camera: PerspectiveCamera;
@@ -38,11 +45,19 @@ export class PartialComponent implements OnInit, AfterViewInit {
   public lock: number;
   public ballSpeed: number;
   public ballAngle: number;
+  public aiSpeed: number;
+  public score: { playerOne: number, playerTow: number };
+  public keyState: any = {};
 
   constructor( private gl: UtilService ) {
     this.lock = 0;
     this.ballSpeed = 0.1;
+    this.aiSpeed = 0.05;
     this.ballAngle = Math.PI;
+    this.score = {
+      playerOne: 0,
+      playerTow: 0
+    };
   }
 
   ngOnInit(): void {
@@ -135,6 +150,8 @@ export class PartialComponent implements OnInit, AfterViewInit {
   private addControls(): void {
     this.controls = new OrbitControls( this.camera, this.renderer.domElement );
     this.controls.dampingFactor = .5;
+    this.controls.enableDamping = false;
+    this.controls.enabled = false;
   }
 
   private addScene(): void {
@@ -169,6 +186,8 @@ export class PartialComponent implements OnInit, AfterViewInit {
       this.checkCoalitionWithPlayerTwo();
       this.checkCoalitionWithTopBarrier();
       this.checkCoalitionWithBottomBarrier();
+      this.aiPlayerTow();
+      this.checkGoal();
 
       // To Final
       this.stats.update();
@@ -218,8 +237,96 @@ export class PartialComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private aiPlayerTow(): void {
+    if ( this.playerTwo.position.y <= ( this.ball.position.y - this.aiSpeed ) ) {
+      if ( this.playerTwo.position.y < ( ( 3 / 2 ) - ( 0.5 / 2 ) ) ) {
+        this.playerTwo.position.y += this.aiSpeed;
+      }
+    }
+
+    if ( this.playerTwo.position.y > this.ball.position.y ) {
+      if ( this.playerTwo.position.y > ( -( 3 / 2 ) + ( 0.5 / 2 ) ) ) {
+        this.playerTwo.position.y -= 0.1;
+      }
+    }
+  }
+
+  private checkGoal(): void {
+
+    // Goal on player one side
+    if ( this.ball.position.x < -5 / 2 - 2 * 0.05 ) {
+
+      const oldBallSpeed = this.saveBallSpeed();
+
+      if ( this.lock === 0 ) {
+        this.score.playerTow += 1;
+        this.scoreTow.nativeElement.innerHTML = this.score.playerTow.toString();
+        setTimeout( () => {
+          this.respawnOnPlayerOne( oldBallSpeed, this.playerOne );
+        }, 1000 );
+        this.lock = 1;
+      }
+
+      this.ballSpeed = 0;
+    }
+
+    // Goal on player two side
+    if ( this.ball.position.x > 5 / 2 + 2 * 0.05 ) {
+
+      const oldBallSpeed = this.saveBallSpeed();
+
+      if ( this.lock === 0 ) {
+        this.score.playerOne += 1;
+        this.scoreOne.nativeElement.innerHTML = this.score.playerOne;
+        setTimeout( () => {
+          this.respawnOnPlayerTwo( oldBallSpeed, this.playerTwo );
+        }, 1000 );
+        this.lock = 1;
+      }
+
+      this.ballSpeed = 0;
+    }
+  }
+
   private addStats(): void {
     this.stats = new Stats();
     this.stats.dom.style.position = 'absolute';
+  }
+
+  private saveBallSpeed(): number {
+    if ( this.ballSpeed !== 0 ) {
+      return this.ballSpeed;
+    }
+  }
+
+  private respawnOnPlayerOne( recoverSpeed: number, playerOne: Mesh ): void {
+    this.ball.position.copy( playerOne.position );
+    console.log( recoverSpeed );
+    this.ballSpeed = -recoverSpeed;
+    this.lock = 0;
+  }
+
+  private respawnOnPlayerTwo( recoverSpeed: number, playerTwo: Mesh ): void {
+    this.ball.position.copy( playerTwo.position );
+    console.log( recoverSpeed );
+    this.ballSpeed = -recoverSpeed;
+    this.lock = 0;
+  }
+
+  @HostListener( 'document:keydown', [ '$event' ] )
+  addKeyboardControls( $event: KeyboardEvent ): void {
+    const key = $event.key;
+
+    if ( key === 'ArrowUp' ) {
+      if ( this.playerOne.position.y < ( ( 3 / 2 ) - ( 0.5 / 2 ) ) ) {
+        this.playerOne.position.y += 0.2;
+      }
+    }
+
+    if ( key === 'ArrowDown' ) {
+      if ( this.playerOne.position.y > ( -( 3 / 2 ) + ( 0.5 / 2 ) ) ) {
+        this.playerOne.position.y -= 0.2;
+      }
+    }
   }
 }
