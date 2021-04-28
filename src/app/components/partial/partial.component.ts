@@ -9,12 +9,11 @@ import { OrbitControls } from 'three-full/sources/controls/OrbitControls';
 import { MeshPhongMaterial } from 'three-full/sources/materials/MeshPhongMaterial';
 import { DoubleSide } from 'three-full/sources/constants';
 import { Mesh } from 'three-full/sources/objects/Mesh';
-import { DirectionalLight } from 'three-full/sources/lights/DirectionalLight';
 import { AmbientLight } from 'three-full/sources/lights/AmbientLight';
 import { SpotLight } from 'three-full/sources/lights/SpotLight';
 import { MeshBasicMaterial } from 'three-full/sources/materials/MeshBasicMaterial';
 import { SphereGeometry } from 'three-full/sources/geometries/SphereGeometry';
-import * as Matter from 'matter-js';
+import { UtilService } from '../../includes/util.service';
 
 @Component( {
   selector: 'app-partial',
@@ -32,14 +31,25 @@ export class PartialComponent implements OnInit, AfterViewInit {
   public controls: OrbitControls;
   public animation: () => void | FrameRequestCallback;
   public ball: Mesh;
+  public playerOne: Mesh;
+  public playerTwo: Mesh;
+  public topBarrier: Mesh;
+  public bottomBarrier: Mesh;
+  public lock: number;
+  public ballSpeed: number;
+  public ballAngle: number;
 
-  constructor() {
+  constructor( private gl: UtilService ) {
+    this.lock = 0;
+    this.ballSpeed = 0.1;
+    this.ballAngle = Math.PI;
   }
 
   ngOnInit(): void {
   }
 
   ngAfterViewInit(): void {
+
     this.addStats();
     this.addScene();
     this.addCamera();
@@ -68,33 +78,33 @@ export class PartialComponent implements OnInit, AfterViewInit {
   private addPlayerTwo(): void {
     const geometry: BoxGeometry = new BoxGeometry( .1, .5, .1 );
     const material: MeshPhongMaterial = new MeshPhongMaterial( { color: 0xFF8C00 } );
-    const player: Mesh = new Mesh( geometry, material );
-    player.position.x = 5 / 2;
-    this.scene.add( player );
+    this.playerTwo = new Mesh( geometry, material );
+    this.playerTwo.position.x = 5 / 2;
+    this.scene.add( this.playerTwo );
   }
 
   private addPlayerOne(): void {
     const geometry: BoxGeometry = new BoxGeometry( .1, .5, .1 );
     const material: MeshPhongMaterial = new MeshPhongMaterial( { color: 0x005000 } );
-    const player: Mesh = new Mesh( geometry, material );
-    player.position.x = -5 / 2;
-    this.scene.add( player );
+    this.playerOne = new Mesh( geometry, material );
+    this.playerOne.position.x = -5 / 2;
+    this.scene.add( this.playerOne );
   }
 
   private addLowHorizontalDecoration(): void {
     const geometry: BoxGeometry = new BoxGeometry( 5.1, .05, .1 );
     const material: MeshBasicMaterial = new MeshBasicMaterial( { color: 0xCCCCCC, side: DoubleSide } );
-    const dec: Mesh = new Mesh( geometry, material );
-    dec.position.y = -3 / 2 - 0.025;
-    this.scene.add( dec );
+    this.bottomBarrier = new Mesh( geometry, material );
+    this.bottomBarrier.position.y = -3 / 2 - 0.025;
+    this.scene.add( this.bottomBarrier );
   }
 
   private addTopHorizontalDecoration(): void {
     const geometry: BoxGeometry = new BoxGeometry( 5.1, .05, .1 );
     const material: MeshBasicMaterial = new MeshBasicMaterial( { color: 0xCCCCCC, side: DoubleSide } );
-    const dec: Mesh = new Mesh( geometry, material );
-    dec.position.y = 3 / 2 + 0.025;
-    this.scene.add( dec );
+    this.topBarrier = new Mesh( geometry, material );
+    this.topBarrier.position.y = 3 / 2 + 0.025;
+    this.scene.add( this.topBarrier );
   }
 
   private addVerticalDecoration(): void {
@@ -135,7 +145,7 @@ export class PartialComponent implements OnInit, AfterViewInit {
     this.camera = new PerspectiveCamera( 70, innerWidth / innerHeight, 1, 3000 );
     this.camera.position.x = 0;
     this.camera.position.y = -3;
-    this.camera.position.z = 4;
+    this.camera.position.z = 3;
   }
 
   private addRender(): void {
@@ -149,11 +159,63 @@ export class PartialComponent implements OnInit, AfterViewInit {
   private addAnimation(): void {
     this.animation = () => {
       requestAnimationFrame( this.animation );
+
+      // Other Elements
+      this.ball.position.x += this.ballSpeed * Math.cos( this.ballAngle );
+      this.ball.position.y += this.ballSpeed * Math.sin( this.ballAngle );
+
+      // Coalitions
+      this.checkCoalitionWithPlayerOne();
+      this.checkCoalitionWithPlayerTwo();
+      this.checkCoalitionWithTopBarrier();
+      this.checkCoalitionWithBottomBarrier();
+
+      // To Final
       this.stats.update();
       this.renderer.render( this.scene, this.camera );
     };
 
     this.animation();
+  }
+
+  private checkCoalitionWithPlayerOne(): void {
+    if (
+      ( this.ball.position.x < this.playerOne.position.x - ( 0.1 / 2 ) )
+      && ( this.ball.position.y < ( this.playerOne.position.y + 0.5 / 2 ) )
+      && ( this.ball.position.y > ( this.playerOne.position.y - 0.5 / 2 ) )
+    ) {
+      if ( this.lock === 0 ) {
+        this.ball.position.x = this.playerOne.position.x + ( 0.1 / 2 );
+        this.ballSpeed = -this.ballSpeed;
+        this.ballAngle = this.gl.randomAngle( -Math.PI / 5, Math.PI / 5 );
+      }
+    }
+  }
+
+  private checkCoalitionWithPlayerTwo(): void {
+    if (
+      ( this.ball.position.x > this.playerTwo.position.x - ( 0.1 / 2 ) )
+      && ( this.ball.position.y < ( this.playerTwo.position.y + 0.5 / 2 ) )
+      && ( this.ball.position.y > ( this.playerTwo.position.y - 0.5 / 2 ) )
+    ) {
+      if ( this.lock === 0 ) {
+        this.ball.position.x = this.playerTwo.position.x - ( 0.1 / 2 );
+        this.ballSpeed = -this.ballSpeed;
+        this.ballAngle = this.gl.randomAngle( -Math.PI / 5, Math.PI / 5 );
+      }
+    }
+  }
+
+  private checkCoalitionWithTopBarrier(): void {
+    if ( this.ball.position.y >= ( 3 / 2 ) ) {
+      this.ballAngle = -this.ballAngle;
+    }
+  }
+
+  private checkCoalitionWithBottomBarrier(): void {
+    if ( this.ball.position.y <= -( 3 / 2 ) ) {
+      this.ballAngle = -this.ballAngle;
+    }
   }
 
   private addStats(): void {

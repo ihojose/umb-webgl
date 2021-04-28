@@ -19,6 +19,10 @@ export class UtilService {
   constructor() {
   }
 
+  public randomAngle( max: number, min: number ): number {
+    return Math.random() * ( max - min ) + min;
+  }
+
   /**
    * ThreeJS Statistics
    * @param _stats Stats Object
