@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { HomeComponent } from './components/home/home.component';
 import { PartialComponent } from './components/partial/partial.component';
+import { TeacupComponent } from './components/teacup/teacup.component';
 
 @NgModule( {
   declarations: [
@@ -19,7 +20,8 @@ import { PartialComponent } from './components/partial/partial.component';
     ComplementsComponent,
     TexturesComponent,
     HomeComponent,
-    PartialComponent
+    PartialComponent,
+    TeacupComponent
   ],
   imports: [
     BrowserModule,

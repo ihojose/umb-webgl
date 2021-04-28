@@ -22,6 +22,7 @@
     "@angular/platform-browser-dynamic": "~11.2.1",
     "@angular/router": "~11.2.1",
     "gsap": "^3.6.1",
+    "matter-js": "^0.17.1",
     "ng2-floating-action-menu": "0.0.3",
     "rxjs": "~6.6.0",
     "three": "^0.127.0",

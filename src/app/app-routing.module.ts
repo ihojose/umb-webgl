@@ -4,6 +4,7 @@ import { ComplementsComponent } from './components/complements/complements.compo
 import { TexturesComponent } from './components/textures/textures.component';
 import { HomeComponent } from './components/home/home.component';
 import { PartialComponent } from './components/partial/partial.component';
+import { TeacupComponent } from './components/teacup/teacup.component';
 
 const routes: Routes = [ {
   path: 'taller/complementos',
@@ -14,6 +15,9 @@ const routes: Routes = [ {
 }, {
   path: 'parcial',
   component: PartialComponent
+}, {
+  path: 'taller/tetera',
+  component: TeacupComponent
 }, {
   path: '',
   component: HomeComponent
