@@ -52,7 +52,7 @@ export class PartialComponent implements OnInit, AfterViewInit {
   constructor( private gl: UtilService ) {
     this.lock = 0;
     this.ballSpeed = 0.1;
-    this.aiSpeed = 0.05;
+    this.aiSpeed = 0.041;
     this.ballAngle = Math.PI;
     this.score = {
       playerOne: 0,
