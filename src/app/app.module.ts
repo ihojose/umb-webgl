@@ -13,6 +13,7 @@ import { MatListModule } from '@angular/material/list';
 import { HomeComponent } from './components/home/home.component';
 import { PartialComponent } from './components/partial/partial.component';
 import { TeacupComponent } from './components/teacup/teacup.component';
+import { AnimationTwoComponent } from './components/animation-two/animation-two.component';
 
 @NgModule( {
   declarations: [
@@ -21,7 +22,8 @@ import { TeacupComponent } from './components/teacup/teacup.component';
     TexturesComponent,
     HomeComponent,
     PartialComponent,
-    TeacupComponent
+    TeacupComponent,
+    AnimationTwoComponent
   ],
   imports: [
     BrowserModule,

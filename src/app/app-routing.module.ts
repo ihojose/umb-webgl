@@ -5,6 +5,7 @@ import { TexturesComponent } from './components/textures/textures.component';
 import { HomeComponent } from './components/home/home.component';
 import { PartialComponent } from './components/partial/partial.component';
 import { TeacupComponent } from './components/teacup/teacup.component';
+import { AnimationTwoComponent } from './components/animation-two/animation-two.component';
 
 const routes: Routes = [ {
   path: 'taller/complementos',
@@ -18,6 +19,9 @@ const routes: Routes = [ {
 }, {
   path: 'taller/tetera',
   component: TeacupComponent
+}, {
+  path: 'taller/animation-2',
+  component: AnimationTwoComponent
 }, {
   path: '',
   component: HomeComponent

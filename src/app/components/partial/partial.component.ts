@@ -319,13 +319,13 @@ export class PartialComponent implements OnInit, AfterViewInit {
 
     if ( key === 'ArrowUp' ) {
       if ( this.playerOne.position.y < ( ( 3 / 2 ) - ( 0.5 / 2 ) ) ) {
-        this.playerOne.position.y += 0.2;
+        this.playerOne.position.y += 0.35;
       }
     }
 
     if ( key === 'ArrowDown' ) {
       if ( this.playerOne.position.y > ( -( 3 / 2 ) + ( 0.5 / 2 ) ) ) {
-        this.playerOne.position.y -= 0.2;
+        this.playerOne.position.y -= 0.35;
       }
     }
   }
